@@ -1,0 +1,134 @@
+{
+    "database": {
+        "sqlite": {
+            "database_uri": "sqlite:///db.sqlite3"
+        },
+        "mysql": {
+            "host": "localhost",
+            "port": 3306,
+            "user": "your_mysql_user",
+            "password": "your_mysql_password",
+            "database": "your_mysql_database",
+            "pool_size": 10,
+            "max_overflow": 20
+        },
+        "postgresql": {
+            "host": "localhost",
+            "port": 5432,
+            "user": "your_postgresql_user",
+            "password": "your_postgresql_password",
+            "database": "your_postgresql_database",
+            "pool_size": 10,
+            "max_overflow": 20
+        }
+    },
+    "api_keys": {
+        "santander": "your_santander_api_key",
+        "ifood": "your_ifood_api_key",
+        "google_maps": "your_google_maps_api_key",
+        "twilio": "your_twilio_api_key",
+        "stripe": "your_stripe_api_key",
+        "sendgrid": "your_sendgrid_api_key"  
+    },
+    "django": {
+        "debug": true,  
+        "allowed_hosts": ["127.0.0.1", "localhost", "yourdomain.com"],
+        "secret_key": "your_django_secret_key",
+        "static_url": "/static/",
+        "static_root": "staticfiles",
+        "media_url": "/media/",
+        "media_root": "media",
+        "timezone": "America/Sao_Paulo",
+        "language_code": "pt-br",
+        "email": {
+            "backend": "django.core.mail.backends.smtp.EmailBackend",
+            "host": "smtp.example.com",
+            "port": 587,
+            "use_tls": true,
+            "host_user": "your_email@example.com",
+            "host_password": "your_email_password",
+            "default_from_email": "webmaster@yourdomain.com",
+            "timeout": 10
+        },
+        "logging": {
+            "level": "DEBUG",
+            "handlers": [
+                {
+                    "class": "logging.FileHandler",
+                    "filename": "django.log",
+                    "level": "DEBUG",
+                    "formatter": "verbose"
+                },
+                {
+                    "class": "logging.StreamHandler",
+                    "level": "ERROR",
+                    "formatter": "simple"
+                }
+            ],
+            "formatters": {
+                "verbose": {
+                    "format": "{levelname} {asctime} {module} {message}",
+                    "style": "{"
+                },
+                "simple": {
+                    "format": "{levelname} {message}",
+                    "style": "{"
+                }
+            }
+        },
+        "caching": {
+            "backend": "django.core.cache.backends.memcached.MemcachedCache",
+            "location": "127.0.0.1:11211",
+            "timeout": 300
+        },
+        "security": {
+            "csrf_cookie_secure": true,
+            "session_cookie_secure": true,
+            "secure_ssl_redirect": true,
+            "x_frame_options": "DENY"
+        }
+    },
+    "flask": {
+        "debug": true,
+        "host": "127.0.0.1",
+        "port": 5000,
+        "secret_key": "your_secret_key_for_session_management",
+        "logging_level": "DEBUG",
+        "allowed_hosts": ["127.0.0.1", "localhost"],
+        "session_cookie_secure": false,
+        "session_cookie_http_only": true,
+        "session_cookie_samesite": "Lax",
+        "database": {
+            "uri": "sqlite:///flask_app.db"
+        },
+        "caching": {
+            "backend": "flask_caching.backends.RedisCache",
+            "uri": "redis://localhost:6379/0",
+            "timeout": 300
+        },
+        "logging": {
+            "level": "DEBUG",
+            "file": "flask_app.log"
+        }
+    },
+    "app": {
+        "name": "Neoenergia",
+        "version": "1.0.0",
+        "description": "Aplicação para gerenciamento de colaboradores e pagamentos.",
+        "author": "Seu Nome",
+        "contact_email": "seu.email@exemplo.com",
+        "documentation_url": "https://seuwebsite.com/documentacao",
+        "features": {
+            "user_management": true,
+            "payment_integration": true,
+            "reporting": true,
+            "notifications": true
+        },
+        "deployment": {
+            "environment": "production",
+            "server": "gunicorn",
+            "workers": 3,
+            "timeout": 30
+        }
+    }
+}
