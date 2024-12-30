@@ -1,0 +1,75 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  workflow_dispatch:
+  schedule:
+    - cron: '0 6 * * 1' # Schedule the workflow to run at 06:00 UTC every Monday
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Lint HTML, CSS, and JavaScript
+        run: |
+          npm install -g htmlhint stylelint jshint
+          htmlhint **/*.html
+          stylelint "**/*.css"
+          jshint **/*.js
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          # Add commands to run your tests here
+          echo "Tests completed."
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Notify Slack
+        if: always()
+        uses: 8398a7/action-slack@v4
+        with:
+          status: ${{ job.status }}
+          fields: workflow,job,commit,repo,ref,author,took
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Clean up workspace
+        if: always()
+        run: |
+          echo "Cleaning up workspace..."
+          rm -rf ./**
