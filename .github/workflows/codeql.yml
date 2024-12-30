@@ -1,0 +1,118 @@
+# For most projects, this workflow file will not need changing; you simply need
+# to commit it to your repository.
+#
+# You may wish to alter this file to override the set of languages analyzed,
+# or to provide custom queries or build logic.
+#
+# ******** NOTE ********
+# We have attempted to detect the languages in your repository. Please check
+# the `language` matrix defined below to confirm you have the correct set of
+# supported CodeQL languages.
+#
+name: "CodeQL Advanced"
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: '28 0 * * 0'
+
+permissions:
+  security-events: write
+  packages: read
+  actions: read
+  contents: read
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: javascript
+            runner: ubuntu-latest
+            build-mode: none
+          - language: typescript
+            runner: ubuntu-latest
+            build-mode: none
+          - language: python
+            runner: ubuntu-latest
+            build-mode: none
+          - language: csharp
+            runner: ubuntu-latest
+            build-mode: build
+          - language: java
+            runner: ubuntu-latest
+            build-mode: build
+          - language: go
+            runner: ubuntu-latest
+            build-mode: build
+          - language: ruby
+            runner: ubuntu-latest
+            build-mode: none
+          - language: cpp
+            runner: ubuntu-latest
+            build-mode: build
+          - language: c
+            runner: ubuntu-latest
+            build-mode: build
+          - language: kotlin
+            runner: ubuntu-latest
+            build-mode: build
+          - language: swift
+            runner: macos-latest
+            build-mode: build
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          queries: security-extended,security-and-quality
+
+      # If the analyze step fails for one of the languages you are analyzing with
+      # "We were unable to automatically build your code", modify the matrix above
+      # to set the build mode to "manual" for that language. Then modify this step
+      # to build your code.
+      - if: matrix.build-mode == 'build'
+        shell: bash
+        run: |
+          echo 'Building the code for language: ${{ matrix.language }}'
+          if [ "${{ matrix.language }}" == "csharp" ]; then
+            dotnet build
+          elif [ "${{ matrix.language }}" == "java" ]; then
+            ./gradlew build
+          elif [ "${{ matrix.language }}" == "go" ]; then
+            go build
+          elif [ "${{ matrix.language }}" == "cpp" ] || [ "${{ matrix.language }}" == "c" ]; then
+            make
+          elif [ "${{ matrix.language }}" == "kotlin" ]; then
+            ./gradlew build
+          elif [ "${{ matrix.language }}" == "swift" ]; then
+            xcodebuild build
+          fi
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{matrix.language}}"
+
+      - name: Upload CodeQL Database
+        uses: actions/upload-artifact@v3
+        with:
+          name: codeql-database-${{ matrix.language }}
+          path: codeql-databases/${{ matrix.language }}
