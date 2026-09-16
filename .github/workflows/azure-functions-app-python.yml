@@ -63,7 +63,7 @@ jobs:
           pytest
 
       - name: Upload artifact for deployment job
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: python-app
           path: .

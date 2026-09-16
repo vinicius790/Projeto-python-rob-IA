@@ -41,7 +41,7 @@ jobs:
           test_search_query: 'tag:e2e-tests' # Modify this tag to suit your tagging strategy
 
       - name: Upload test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: datadog-synthetic-results
           path: datadog-results/

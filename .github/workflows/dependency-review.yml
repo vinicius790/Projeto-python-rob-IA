@@ -50,7 +50,7 @@ jobs:
           severity: high
 
       - name: 'Upload Dependency Review Report'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v7
         with:
           name: dependency-review-report
           path: dependency-review-report.txt
