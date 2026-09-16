@@ -1,0 +1,84 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support documentation.
+
+# APIsec addresses the critical need to secure APIs before they reach production.
+# APIsec provides the industry’s only automated and continuous API testing platform that uncovers security vulnerabilities and logic flaws in APIs.
+# Clients rely on APIsec to evaluate every update and release, ensuring that no APIs go to production with vulnerabilities.
+
+# How to Get Started with APIsec.ai
+# 1. Schedule a demo at https://www.apisec.ai/request-a-demo .
+#
+# 2. Register your account at https://cloud.apisec.ai/#/signup .
+#
+# 3. Register your API. See the video (https://www.youtube.com/watch?v=MK3Xo9Dbvac) to get up and running with APIsec quickly.
+#
+# 4. Get GitHub Actions scan attributes from APIsec Project -> Configurations -> Integrations -> CI-CD -> GitHub Actions
+
+name: APIsec
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: '15 17 * * 3'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  pull-requests: write
+
+jobs:
+  trigger-apisec-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: APIsec scan
+        uses: apisec-inc/apisec-run-scan@025432089674a28ba8fb55f8ab06c10215e772ea
+        with:
+          apisec-username: ${{ secrets.apisec_username }}
+          apisec-password: ${{ secrets.apisec_password }}
+          apisec-project: "VAmPI"
+          sarif-result-file: "apisec-results.sarif"
+
+      - name: Import results to GitHub Code Scanning
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: ./apisec-results.sarif
+
+      - name: Post results summary
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const sarifFile = './apisec-results.sarif';
+            const sarifResults = fs.readFileSync(sarifFile, 'utf8');
+            const summary = `### APIsec Scan Summary\n\n${sarifResults}`;
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: summary,
+            });
+
+      - name: Clean up workspace
+        run: |
+          echo "Cleaning up workspace..."
+          rm -rf ./**
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: trigger-apisec-scan
+    steps:
+      - name: Notify Success
+        if: success()
+        run: echo "APIsec scan completed successfully!"
+
+      - name: Notify Failure
+        if: failure()
+        run: echo "APIsec scan failed."

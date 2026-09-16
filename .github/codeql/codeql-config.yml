@@ -1,0 +1,3 @@
+name: robia-codeql
+paths-ignore:
+  - legacy/**

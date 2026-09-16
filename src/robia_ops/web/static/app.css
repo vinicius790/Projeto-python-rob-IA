@@ -1,0 +1,35 @@
+:root {
+  color-scheme: dark;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #0b1020;
+  color: #eef2ff;
+}
+* { box-sizing: border-box; }
+body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top right, #17315d 0, #0b1020 42%); }
+a { color: #91c8ff; text-decoration: none; }
+.hero { max-width: 1200px; margin: 0 auto; padding: 56px 24px 28px; display: flex; justify-content: space-between; gap: 24px; align-items: end; }
+.eyebrow { color: #78dcca; font-weight: 700; text-transform: uppercase; letter-spacing: .12em; font-size: .78rem; }
+h1 { font-size: clamp(2.6rem, 8vw, 5.5rem); margin: 0; letter-spacing: -.06em; }
+.subtitle { color: #aab7d4; max-width: 720px; }
+.docs { border: 1px solid #385070; border-radius: 999px; padding: 10px 16px; background: #111b31; white-space: nowrap; }
+main { max-width: 1200px; margin: 0 auto; padding: 0 24px 60px; }
+.metrics { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin-bottom: 18px; }
+.metrics article, .panel { background: rgba(17, 27, 49, .88); border: 1px solid #223657; box-shadow: 0 18px 50px rgba(0,0,0,.18); border-radius: 16px; }
+.metrics article { padding: 18px; }
+.metrics span { display: block; color: #8ea1c1; font-size: .82rem; }
+.metrics strong { display: block; margin-top: 8px; font-size: 1.35rem; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.panel { padding: 20px; overflow: hidden; }
+.panel-title { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+h2 { margin: 0 0 16px; font-size: 1rem; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+th, td { text-align: left; padding: 12px 9px; border-bottom: 1px solid #1e3150; }
+th { color: #8ea1c1; font-weight: 600; }
+.badge { display: inline-flex; padding: 4px 8px; border-radius: 999px; background: #263b5d; font-size: .75rem; }
+.badge.ok { background: #123f39; color: #91eadc; }
+.badge.off { background: #3c2a33; color: #ffbcc7; }
+.note { margin-top: 18px; color: #b9c7df; }
+code { color: #a4e8dc; }
+@media (max-width: 900px) { .metrics { grid-template-columns: repeat(2, 1fr); } .grid { grid-template-columns: 1fr; } }
+@media (max-width: 560px) { .hero { align-items: start; flex-direction: column; } .metrics { grid-template-columns: 1fr; } }

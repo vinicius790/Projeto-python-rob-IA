@@ -1,0 +1,48 @@
+services:
+  app:
+    build: .
+    init: true
+    environment:
+      ROBIA_ENV: development
+      ROBIA_DATABASE_URL: postgresql+psycopg://robia:${ROBIA_DB_PASSWORD:-robia-local-only}@db:5432/robia
+      ROBIA_PII_KEY: ${ROBIA_PII_KEY:-compose-local-pii-key-change-me}
+      ROBIA_ADMIN_API_KEY: ${ROBIA_ADMIN_API_KEY:-}
+      ROBIA_ALLOWED_HOSTS: localhost,127.0.0.1,app
+      ROBIA_ENABLE_METRICS: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/live', timeout=3).read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: robia
+      POSTGRES_USER: robia
+      POSTGRES_PASSWORD: ${ROBIA_DB_PASSWORD:-robia-local-only}
+    volumes:
+      - robia_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U robia -d robia"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  robia_pgdata:

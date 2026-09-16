@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RobIA Ops</title>
+  <link rel="stylesheet" href="/static/app.css">
+</head>
+<body>
+  <header class="hero">
+    <div>
+      <p class="eyebrow">Workforce & Payment Operations</p>
+      <h1>RobIA Ops</h1>
+      <p class="subtitle">Dashboard operacional com processamento sandbox, auditoria e analytics explicáveis.</p>
+    </div>
+    <a class="docs" href="/docs">OpenAPI</a>
+  </header>
+
+  <main>
+    <section class="metrics" aria-label="Resumo">
+      <article><span>Colaboradores</span><strong>{{ summary.employees_total }}</strong></article>
+      <article><span>Ativos</span><strong>{{ summary.employees_active }}</strong></article>
+      <article><span>Pagamentos</span><strong>{{ summary.payments_total }}</strong></article>
+      <article><span>Processados</span><strong>{{ summary.processed_total }}</strong></article>
+      <article><span>Falhas</span><strong>{{ summary.failed_total }}</strong></article>
+      <article><span>Folha registrada</span><strong>R$ {{ '%.2f'|format(summary.payroll_total) }}</strong></article>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <div class="panel-title"><h2>Colaboradores recentes</h2><a href="/api/v1/employees">JSON</a></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nome</th><th>CPF</th><th>Salário</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for employee in employees %}
+              <tr>
+                <td>{{ employee.name }}</td>
+                <td>***.***.***-{{ employee.cpf_last2 }}</td>
+                <td>R$ {{ '%.2f'|format(employee.salary) }}</td>
+                <td><span class="badge {{ 'ok' if employee.active else 'off' }}">{{ 'ativo' if employee.active else 'inativo' }}</span></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="4">Sem dados. Use <code>robia seed-demo</code> para uma demonstração.</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+
+      <article class="panel">
+        <div class="panel-title"><h2>Pagamentos recentes</h2><a href="/api/v1/payments">JSON</a></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>ID</th><th>Colaborador</th><th>Referência</th><th>Total</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for payment in payments %}
+              <tr>
+                <td>#{{ payment.id }}</td>
+                <td>{{ payment.employee_id }}</td>
+                <td>{{ payment.reference_date }}</td>
+                <td>R$ {{ '%.2f'|format(payment.total) }}</td>
+                <td><span class="badge">{{ payment.status.value }}</span></td>
+              </tr>
+            {% else %}
+              <tr><td colspan="5">Nenhum pagamento cadastrado.</td></tr>
+            {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section class="panel note">
+      <h2>Segurança por padrão</h2>
+      <p>O adapter financeiro ativo é <strong>sandbox</strong>. Ele não realiza transferências reais e não faz chamadas externas. O CPF completo não é persistido pela aplicação v3; apenas um fingerprint HMAC e os dois últimos dígitos são armazenados.</p>
+    </section>
+  </main>
+</body>
+</html>

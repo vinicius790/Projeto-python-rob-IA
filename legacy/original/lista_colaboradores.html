@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Colaboradores</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <link rel="stylesheet" href="{% static 'css/datatables.min.css' %}">
+</head>
+<body>
+    <div class="container">
+        <h1>Lista de Colaboradores</h1>
+        <table id="colaboradoresTable">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>CPF</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for colaborador in colaboradores %}
+                <tr>
+                    <td>{{ colaborador.nome }}</td>
+                    <td>{{ colaborador.cpf }}</td>
+                    <td class="action-links">
+                        <a href="{% url 'pagamentos:colaborador_detail' colaborador.id %}">Visualizar</a>
+                        <a href="{% url 'pagamentos:colaborador_update' colaborador.id %}">Editar</a>
+                        <a href="{% url 'pagamentos:colaborador_delete' colaborador.id %}" onclick="return confirm('Tem certeza que deseja excluir este colaborador?');">Excluir</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="no-data">Nenhum colaborador encontrado.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="{% static 'js/jquery.min.js' %}"></script>
+    <script src="{% static 'js/datatables.min.js' %}"></script>
+    <script src="{% static 'js/scripts.js' %}"></script>
+</body>
+</html>

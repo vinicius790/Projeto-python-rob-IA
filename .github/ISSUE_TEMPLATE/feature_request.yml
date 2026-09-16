@@ -1,0 +1,17 @@
+name: Feature request
+description: Proponha uma melhoria com valor concreto.
+title: "[feature] "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: Necessidade
+      description: Qual problema real a proposta resolve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposta
+      description: Descreva a solução e alternativas consideradas.

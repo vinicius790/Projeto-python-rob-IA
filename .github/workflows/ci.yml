@@ -1,0 +1,135 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - name: Install project and quality tools
+        run: python -m pip install -e ".[dev,ml]"
+      - name: Compile
+        run: python -m compileall -q src tests alembic scripts
+      - name: Lint
+        run: ruff check src tests scripts
+      - name: Type check
+        run: mypy src/robia_ops
+      - name: Test with branch coverage
+        run: pytest --cov=robia_ops --cov-report=term-missing --cov-report=xml --cov-fail-under=88
+      - uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+
+  compatibility:
+    name: Python ${{ matrix.python-version }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+      - run: python -m pip install -e ".[dev]"
+      - run: pytest -q
+
+  legacy-migration:
+    name: v2 to v3 migration smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: python -m pip install -e .
+      - name: Create revision 0001 and seed representative data
+        env:
+          ROBIA_DATABASE_URL: sqlite:///./legacy-migration.db
+          ROBIA_PII_KEY: ci-migration-key
+        run: |
+          alembic upgrade 0001
+          python scripts/seed_v2_schema.py
+      - name: Upgrade to head and verify one-way CPF migration
+        env:
+          ROBIA_DATABASE_URL: sqlite:///./legacy-migration.db
+          ROBIA_PII_KEY: ci-migration-key
+        run: |
+          alembic upgrade head
+          python scripts/verify_legacy_migration.py
+
+  postgres:
+    name: PostgreSQL integration smoke
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: robia
+          POSTGRES_USER: robia
+          POSTGRES_PASSWORD: robia-ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U robia -d robia"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: python -m pip install -e ".[postgres]"
+      - name: Migrate and exercise CLI
+        env:
+          ROBIA_DATABASE_URL: postgresql+psycopg://robia:robia-ci@127.0.0.1:5432/robia
+          ROBIA_PII_KEY: ci-postgres-pii-key
+        run: |
+          alembic upgrade head
+          robia seed-demo
+          robia generate-payroll 2026-09-01
+          robia doctor
+
+  package:
+    name: Build and wheel smoke
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+      - run: python -m pip install build
+      - run: python -m build
+      - name: Install wheel in isolated virtual environment
+        run: |
+          python -m venv .wheel-venv
+          .wheel-venv/bin/python -m pip install dist/*.whl
+          .wheel-venv/bin/robia --version
+          .wheel-venv/bin/python -c "import importlib.resources as r; assert (r.files('robia_ops')/'web/templates/dashboard.html').is_file()"
+
+  docker-build:
+    name: Container build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - run: docker build --tag robia-ops:ci .

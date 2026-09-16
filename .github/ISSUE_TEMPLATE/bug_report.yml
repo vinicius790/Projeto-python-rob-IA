@@ -1,0 +1,23 @@
+name: Bug report
+description: Relate um problema reproduzível.
+title: "[bug] "
+labels: [bug]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema
+      description: O que aconteceu e o que era esperado?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reprodução
+      description: Passos mínimos, sem credenciais ou dados pessoais.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Versão / commit
