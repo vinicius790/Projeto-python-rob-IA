@@ -48,7 +48,7 @@ jobs:
 
     steps:
       - name: Download pylint report
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v8
         with:
           name: pylint-report
 
